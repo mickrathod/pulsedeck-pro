@@ -48,25 +48,25 @@ export const DeckScreen = ({
       </div>
 
       <div className="track-load-bar">
-        <div className="track-picker-box">
-          <span className="picker-icon">🎵</span>
+        <div className={`track-picker-box deck-${deckId.toLowerCase()}-picker`}>
+          <span className="picker-badge">SELECT SONG:</span>
           <select
             className="builtin-track-select"
             value={currentTrackId || ''}
             onChange={(e) => onSelectTrack && onSelectTrack(e.target.value)}
-            title="Load a song into this deck"
+            title="Click to select a song from the library"
           >
-            <option value="" disabled>Load Song from Crate...</option>
+            <option value="" disabled>Choose Song from Crate...</option>
             {BUILTIN_TRACKS.map((t) => (
               <option key={t.id} value={t.id}>
-                {t.title} ({t.bpm} BPM)
+                🎵 {t.title} — {t.bpm} BPM ({t.genre})
               </option>
             ))}
           </select>
         </div>
 
         <label className="file-load-btn" title="Load custom audio file (MP3 / WAV)">
-          <span>📁</span> Load Local MP3
+          <span>📁</span> Or Drop MP3
           <input
             type="file"
             accept="audio/*"

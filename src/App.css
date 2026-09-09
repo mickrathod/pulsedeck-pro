@@ -1384,41 +1384,82 @@
 .track-picker-box {
   display: flex;
   align-items: center;
-  gap: 6px;
-  background: #090c13;
-  border: 1px solid rgba(0, 240, 255, 0.25);
+  gap: 8px;
+  background: #080a10;
   border-radius: 8px;
-  padding: 4px 10px;
+  padding: 6px 12px;
   flex: 1;
-  min-width: 180px;
+  min-width: 200px;
   transition: all 0.2s ease;
 }
 
-.track-picker-box:hover {
-  border-color: #00f0ff;
-  box-shadow: 0 0 10px rgba(0, 240, 255, 0.2);
+.deck-a-picker {
+  border: 1px solid rgba(0, 240, 255, 0.45);
+  box-shadow: 0 0 10px rgba(0, 240, 255, 0.12);
 }
 
-.picker-icon {
-  font-size: 13px;
+.deck-a-picker:hover {
+  border-color: #00f0ff;
+  box-shadow: 0 0 14px rgba(0, 240, 255, 0.3);
+}
+
+.deck-b-picker {
+  border: 1px solid rgba(255, 0, 127, 0.45);
+  box-shadow: 0 0 10px rgba(255, 0, 127, 0.12);
+}
+
+.deck-b-picker:hover {
+  border-color: #ff007f;
+  box-shadow: 0 0 14px rgba(255, 0, 127, 0.3);
+}
+
+.picker-badge {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  white-space: nowrap;
+}
+
+.deck-a-picker .picker-badge {
+  background: rgba(0, 240, 255, 0.2);
+  color: #00f0ff;
+  border: 1px solid rgba(0, 240, 255, 0.35);
+}
+
+.deck-b-picker .picker-badge {
+  background: rgba(255, 0, 127, 0.2);
+  color: #ff007f;
+  border: 1px solid rgba(255, 0, 127, 0.35);
 }
 
 .builtin-track-select {
   background: transparent;
   border: none;
-  color: #00f0ff;
-  font-size: 12px;
-  font-weight: 700;
+  font-size: 12.5px;
+  font-weight: 800;
   width: 100%;
   outline: none;
   cursor: pointer;
   padding: 2px 0;
 }
 
+.deck-a-picker .builtin-track-select {
+  color: #00f0ff;
+}
+
+.deck-b-picker .builtin-track-select {
+  color: #ff007f;
+}
+
 .builtin-track-select option {
-  background: #101420;
-  color: #cbd5e1;
+  background: #0d111b;
+  color: #ffffff;
   font-size: 12px;
+  padding: 6px;
 }
 
 .file-load-btn {
