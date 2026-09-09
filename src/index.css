@@ -1,0 +1,49 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&family=Outfit:wght@600;700;800&display=swap');
+
+:root {
+  --bg-main: #0a0c12;
+  --panel-bg: #12151f;
+  --panel-border: rgba(255, 255, 255, 0.08);
+  --panel-bevel: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 8px 30px rgba(0, 0, 0, 0.7);
+
+  --deck-a-color: #00f0ff;
+  --deck-a-glow: rgba(0, 240, 255, 0.35);
+  --deck-b-color: #ff007f;
+  --deck-b-glow: rgba(255, 0, 127, 0.35);
+
+  --accent-gold: #ffb800;
+  --led-green: #00ff66;
+  --led-amber: #ffaa00;
+  --led-red: #ff2244;
+
+  --text-main: #f0f3fa;
+  --text-muted: #8890a6;
+  --text-dim: #505668;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+body {
+  background-color: var(--bg-main);
+  background-image:
+    radial-gradient(circle at 15% 15%, rgba(0, 240, 255, 0.04) 0%, transparent 40%),
+    radial-gradient(circle at 85% 15%, rgba(255, 0, 127, 0.04) 0%, transparent 40%),
+    radial-gradient(circle at 50% 80%, rgba(255, 184, 0, 0.03) 0%, transparent 50%),
+    linear-gradient(180deg, #07090e 0%, #0d1017 100%);
+  color: var(--text-main);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}

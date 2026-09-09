@@ -1,0 +1,64 @@
+.rotary-knob-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  position: relative;
+  user-select: none;
+}
+
+.rotary-knob-body {
+  border-radius: 50%;
+  background: radial-gradient(circle, #2a3040 0%, #141722 80%);
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.7), inset 0 1px 2px rgba(255, 255, 255, 0.4);
+  position: relative;
+  cursor: ns-resize;
+  transition: border-color 0.15s ease;
+}
+
+.rotary-knob-body:hover {
+  border-color: rgba(255, 255, 255, 0.35);
+}
+
+.rotary-knob-body.active {
+  border-color: var(--deck-color, #00f0ff);
+  box-shadow: 0 0 12px var(--deck-color, rgba(0, 240, 255, 0.4));
+}
+
+.rotary-knob-pointer {
+  position: absolute;
+  top: 4px;
+  left: calc(50% - 1.5px);
+  width: 3px;
+  height: 12px;
+  background: #ffffff;
+  border-radius: 2px;
+  box-shadow: 0 0 4px #ffffff;
+  transform-origin: 1.5px calc(23px - 4px);
+}
+
+.rotary-knob-label {
+  font-size: 9px;
+  font-weight: 700;
+  color: #8890a6;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.rotary-knob-readout {
+  font-size: 8px;
+  font-family: monospace;
+  color: #505668;
+}
+
+/* Color Filter Knob Variant */
+.filter-variant .rotary-knob-body {
+  background: radial-gradient(circle, #353a4d 0%, #181b26 80%);
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.filter-variant .rotary-knob-pointer {
+  background: #ffb800;
+  box-shadow: 0 0 6px #ffb800;
+}
