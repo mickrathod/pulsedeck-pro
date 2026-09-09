@@ -6,6 +6,7 @@ import { Deck } from './components/Deck/Deck';
 import { Mixer } from './components/Mixer/Mixer';
 import { SamplerRack } from './components/Sampler/SamplerRack';
 import { ShortcutsModal } from './components/Common/ShortcutsModal';
+import { DJGuideModal } from './components/Common/DJGuideModal';
 import './App.css';
 
 export function App() {
@@ -87,6 +88,7 @@ export function App() {
   const [isRecording, setIsRecording] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
   const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
+  const [isGuideOpen, setIsGuideOpen] = useState(false);
 
   // Initialize Demo Tracks
   const loadDemoTracks = useCallback(() => {
@@ -525,6 +527,7 @@ export function App() {
         recordingTime={recordingTime}
         onRecordToggle={handleRecordToggle}
         onOpenShortcuts={() => setIsShortcutsOpen(true)}
+        onOpenGuide={() => setIsGuideOpen(true)}
         onResetDemos={loadDemoTracks}
         masterAnalyser={engine.masterAnalyser}
       />
@@ -594,6 +597,11 @@ export function App() {
       <ShortcutsModal
         isOpen={isShortcutsOpen}
         onClose={() => setIsShortcutsOpen(false)}
+      />
+
+      <DJGuideModal
+        isOpen={isGuideOpen}
+        onClose={() => setIsGuideOpen(false)}
       />
     </div>
   );

@@ -8,6 +8,7 @@ export const Header = ({
   recordingTime,
   onRecordToggle,
   onOpenShortcuts,
+  onOpenGuide,
   onResetDemos,
   masterAnalyser
 }) => {
@@ -92,6 +93,10 @@ export const Header = ({
         >
           <span className="rec-dot" />
           <span>{isRecording ? formatRecTime(recordingTime) : 'REC MIX'}</span>
+        </button>
+
+        <button className="top-action-btn" onClick={onOpenGuide} title="Can I learn real DJing here?" style={{ borderColor: 'rgba(0, 240, 255, 0.4)', color: '#00f0ff' }}>
+          <span>🎓</span> Real DJ Guide
         </button>
 
         <button className="top-action-btn" onClick={onOpenShortcuts} title="Keyboard Shortcuts">
