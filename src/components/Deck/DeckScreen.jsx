@@ -1,4 +1,5 @@
 import React from 'react';
+import { BUILTIN_TRACKS } from '../../audio/AudioEngine';
 
 function formatTime(seconds) {
   if (isNaN(seconds) || seconds < 0) return '0:00.0';
@@ -16,7 +17,9 @@ export const DeckScreen = ({
   bpm,
   pitchPercent,
   onFileUpload,
-  onReloadDemo
+  onReloadDemo,
+  onSelectTrack,
+  currentTrackId
 }) => {
   const pitchFormatted = pitchPercent >= 0 ? `+${pitchPercent.toFixed(1)}%` : `${pitchPercent.toFixed(1)}%`;
 
@@ -45,8 +48,25 @@ export const DeckScreen = ({
       </div>
 
       <div className="track-load-bar">
-        <label className="file-load-btn" title="Load custom audio file">
-          <span>📁</span> Load Audio File
+        <div className="track-picker-box">
+          <span className="picker-icon">🎵</span>
+          <select
+            className="builtin-track-select"
+            value={currentTrackId || ''}
+            onChange={(e) => onSelectTrack && onSelectTrack(e.target.value)}
+            title="Load a song into this deck"
+          >
+            <option value="" disabled>Load Song from Crate...</option>
+            {BUILTIN_TRACKS.map((t) => (
+              <option key={t.id} value={t.id}>
+                {t.title} ({t.bpm} BPM)
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <label className="file-load-btn" title="Load custom audio file (MP3 / WAV)">
+          <span>📁</span> Load Local MP3
           <input
             type="file"
             accept="audio/*"
@@ -58,9 +78,6 @@ export const DeckScreen = ({
             }}
           />
         </label>
-        <button className="demo-track-btn" onClick={onReloadDemo} title="Reload Built-in Demo">
-          Demo Track
-        </button>
       </div>
     </div>
   );

@@ -26,7 +26,8 @@ export const Deck = ({
   onLoopBeatsChange,
   onHotCueTrigger,
   onFileUpload,
-  onReloadDemo
+  onReloadDemo,
+  onSelectTrack
 }) => {
   return (
     <section className={`deck-chassis deck-${deckId.toLowerCase()}`}>
@@ -39,6 +40,8 @@ export const Deck = ({
         pitchPercent={deckState.pitchPercent}
         onFileUpload={onFileUpload}
         onReloadDemo={onReloadDemo}
+        onSelectTrack={onSelectTrack}
+        currentTrackId={deckState.trackId}
       />
 
       <WaveformView

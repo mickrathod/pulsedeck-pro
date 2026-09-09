@@ -4,6 +4,57 @@
  * 3-band kill EQ, resonant filter sweeps, scratch physics, sampler bank, and mix recorder.
  */
 
+export const BUILTIN_TRACKS = [
+  {
+    id: 'cyberpulse',
+    title: 'Cyberpulse (Tech House)',
+    artist: 'DJ Studio Pro',
+    genre: 'Tech House',
+    bpm: 124,
+    bars: 32
+  },
+  {
+    id: 'neondrift',
+    title: 'Neon Drift (Electro Club)',
+    artist: 'DJ Studio Pro',
+    genre: 'Electro Club',
+    bpm: 128,
+    bars: 32
+  },
+  {
+    id: 'mumbainights',
+    title: 'Mumbai Nights (Desi Club Drop)',
+    artist: 'DJ Studio Pro',
+    genre: 'Bollywood EDM',
+    bpm: 126,
+    bars: 32
+  },
+  {
+    id: 'sunsetgoa',
+    title: 'Sunset at Goa (Melodic Deep House)',
+    artist: 'DJ Studio Pro',
+    genre: 'Deep House',
+    bpm: 122,
+    bars: 32
+  },
+  {
+    id: 'retrocyber',
+    title: 'Midnight Arcade (80s Synthwave)',
+    artist: 'DJ Studio Pro',
+    genre: 'Synthwave',
+    bpm: 120,
+    bars: 32
+  },
+  {
+    id: 'tokyotrap',
+    title: 'Tokyo Drift (Future 808 Trap)',
+    artist: 'DJ Studio Pro',
+    genre: 'Future Trap',
+    bpm: 130,
+    bars: 32
+  }
+];
+
 export class DJAudioEngine {
   constructor() {
     const AudioContextClass = window.AudioContext || window.webkitAudioContext;
@@ -814,29 +865,56 @@ export class DJAudioEngine {
   }
 
   generateDemoTracks() {
+    this.loadBuiltinTrack('A', 'cyberpulse');
+    this.loadBuiltinTrack('B', 'neondrift');
+  }
+
+  loadBuiltinTrack(deckId, trackId) {
+    const deck = deckId === 'A' ? this.deckA : this.deckB;
+    const track = BUILTIN_TRACKS.find(t => t.id === trackId) || BUILTIN_TRACKS[0];
     const sampleRate = this.ctx.sampleRate;
+    const bars = track.bars || 32;
+    const duration = (bars * 4 * 60) / track.bpm;
+    const buffer = this.ctx.createBuffer(2, Math.floor(sampleRate * duration), sampleRate);
 
-    // Track A: Cyberpulse (124 BPM, 32 bars)
-    const bpmA = 124;
-    const durationA = (32 * 4 * 60) / bpmA;
-    const bufferA = this.ctx.createBuffer(2, Math.floor(sampleRate * durationA), sampleRate);
-    this.synthesizeTechHouseTrack(bufferA, bpmA, 32);
-    this.deckA.buffer = bufferA;
-    this.deckA.reverseBuffer = this.createReverseBuffer(bufferA);
-    this.deckA.duration = durationA;
-    this.deckA.originalBpm = bpmA;
-    this.deckA.currentBpm = bpmA;
+    if (track.id === 'cyberpulse') {
+      this.synthesizeTechHouseTrack(buffer, track.bpm, bars);
+    } else if (track.id === 'neondrift') {
+      this.synthesizeElectroTrack(buffer, track.bpm, bars);
+    } else if (track.id === 'mumbainights') {
+      this.synthesizeBollywoodClubTrack(buffer, track.bpm, bars);
+    } else if (track.id === 'sunsetgoa') {
+      this.synthesizeGoaDeepHouseTrack(buffer, track.bpm, bars);
+    } else if (track.id === 'retrocyber') {
+      this.synthesizeSynthwaveRetroTrack(buffer, track.bpm, bars);
+    } else if (track.id === 'tokyotrap') {
+      this.synthesizeFutureTrapTrack(buffer, track.bpm, bars);
+    } else {
+      this.synthesizeTechHouseTrack(buffer, track.bpm, bars);
+    }
 
-    // Track B: Neon Drift (128 BPM, 32 bars)
-    const bpmB = 128;
-    const durationB = (32 * 4 * 60) / bpmB;
-    const bufferB = this.ctx.createBuffer(2, Math.floor(sampleRate * durationB), sampleRate);
-    this.synthesizeElectroTrack(bufferB, bpmB, 32);
-    this.deckB.buffer = bufferB;
-    this.deckB.reverseBuffer = this.createReverseBuffer(bufferB);
-    this.deckB.duration = durationB;
-    this.deckB.originalBpm = bpmB;
-    this.deckB.currentBpm = bpmB;
+    deck.buffer = buffer;
+    deck.reverseBuffer = this.createReverseBuffer(buffer);
+    deck.duration = duration;
+    deck.originalBpm = track.bpm;
+    deck.currentBpm = track.bpm;
+    deck.trackTitle = track.title;
+    deck.trackArtist = track.artist;
+    deck.trackId = track.id;
+    deck.pauseOffset = 0;
+    deck.currentTime = 0;
+    deck.pitchPercent = 0;
+    deck.playbackRate = 1.0;
+    deck.hotCues = [null, null, null, null];
+    deck.loopActive = false;
+
+    return {
+      deckId,
+      track,
+      duration,
+      bpm: track.bpm,
+      buffer
+    };
   }
 
   synthesizeTechHouseTrack(buffer, bpm, bars) {
@@ -1027,6 +1105,340 @@ export class DJAudioEngine {
           left[arpStart + i] += val * (1 - pan * 0.3);
           right[arpStart + i] += val * (1 + pan * 0.3);
         }
+      }
+    }
+    this.normalizeBuffer(buffer, 0.88);
+  }
+
+  synthesizeBollywoodClubTrack(buffer, bpm, bars) {
+    const sampleRate = buffer.sampleRate;
+    const left = buffer.getChannelData(0);
+    const right = buffer.getChannelData(1);
+    const beatSamples = (60 / bpm) * sampleRate;
+    const barSamples = beatSamples * 4;
+
+    // D minor pentatonic Indian EDM hook: D4, F4, G4, A4, C5, D5
+    const hookNotes = [293.66, 349.23, 392.0, 440.0, 392.0, 349.23, 293.66, 440.0];
+    const bassNotes = [146.83, 116.54, 130.81, 146.83]; // D3, Bb2, C3, D3
+
+    for (let bar = 0; bar < bars; bar++) {
+      const barStart = Math.floor(bar * barSamples);
+      const bassRoot = bassNotes[Math.floor(bar / 4) % bassNotes.length];
+
+      for (let beat = 0; beat < 4; beat++) {
+        const kickStart = Math.floor(barStart + beat * beatSamples);
+        const kickLen = Math.floor(0.38 * sampleRate);
+
+        // 1. Punchy club kick
+        for (let i = 0; i < kickLen && kickStart + i < left.length; i++) {
+          const t = i / sampleRate;
+          const freq = 145 * Math.exp(-t * 30) + 45;
+          const phase = 2 * Math.PI * freq * t;
+          const env = Math.exp(-t * 9.0);
+          const click = (i < 65) ? 0.45 : 0;
+          const val = (Math.sin(phase) * 0.85 + click) * env;
+          left[kickStart + i] += val * 0.75;
+          right[kickStart + i] += val * 0.75;
+        }
+
+        // 2. Dhol rim / high slap offbeat
+        const dholStart = Math.floor(kickStart + beatSamples * 0.5);
+        const dholLen = Math.floor(0.12 * sampleRate);
+        for (let i = 0; i < dholLen && dholStart + i < left.length; i++) {
+          const t = i / sampleRate;
+          const slapFreq = 380 * Math.exp(-t * 40) + 180;
+          const tone = Math.sin(2 * Math.PI * slapFreq * t) * Math.exp(-t * 22);
+          const noise = (Math.random() * 2 - 1) * Math.exp(-t * 35);
+          const val = (tone * 0.6 + noise * 0.4) * 0.35;
+          left[dholStart + i] += val * 0.9;
+          right[dholStart + i] += val * 0.7;
+        }
+
+        // 3. Indian festival claps on beats 1 & 3
+        if (beat === 1 || beat === 3) {
+          const clapStart = kickStart;
+          const clapLen = Math.floor(0.24 * sampleRate);
+          for (let i = 0; i < clapLen && clapStart + i < left.length; i++) {
+            const t = i / sampleRate;
+            const noise = (Math.random() * 2 - 1) * Math.exp(-t * 16);
+            left[clapStart + i] += noise * 0.38;
+            right[clapStart + i] += noise * 0.38;
+          }
+        }
+      }
+
+      // 4. Groovy 16th-note sub bass
+      const sixteenth = beatSamples / 4;
+      const bassPattern = [1, 0, 1, 0,  0, 1, 0, 1,  1, 0, 1, 0,  0, 1, 1, 0];
+      for (let s = 0; s < 16; s++) {
+        if (bassPattern[s]) {
+          const bassStart = Math.floor(barStart + s * sixteenth);
+          const bassLen = Math.floor(0.14 * sampleRate);
+          for (let i = 0; i < bassLen && bassStart + i < left.length; i++) {
+            const t = i / sampleRate;
+            const saw = (2 * ((bassRoot * t) % 1) - 1);
+            const sine = Math.sin(2 * Math.PI * (bassRoot * 0.5) * t);
+            const env = Math.exp(-t * 12);
+            const val = (saw * 0.4 + sine * 0.6) * env * 0.5;
+            left[bassStart + i] += val;
+            right[bassStart + i] += val;
+          }
+        }
+      }
+
+      // 5. Bollywood Synth Brass Hook
+      for (let s = 0; s < 8; s++) {
+        const leadStart = Math.floor(barStart + s * (beatSamples * 0.5));
+        const leadLen = Math.floor(0.26 * sampleRate);
+        const note = hookNotes[(bar * 2 + s) % hookNotes.length];
+        for (let i = 0; i < leadLen && leadStart + i < left.length; i++) {
+          const t = i / sampleRate;
+          const saw1 = (2 * ((note * t) % 1) - 1);
+          const saw2 = (2 * (((note * 1.006) * t) % 1) - 1);
+          const env = Math.exp(-t * 10);
+          const val = (saw1 * 0.5 + saw2 * 0.5) * env * 0.22;
+          left[leadStart + i] += val * 0.85;
+          right[leadStart + i] += val * 0.95;
+        }
+      }
+    }
+    this.normalizeBuffer(buffer, 0.88);
+  }
+
+  synthesizeGoaDeepHouseTrack(buffer, bpm, bars) {
+    const sampleRate = buffer.sampleRate;
+    const left = buffer.getChannelData(0);
+    const right = buffer.getChannelData(1);
+    const beatSamples = (60 / bpm) * sampleRate;
+    const barSamples = beatSamples * 4;
+
+    // Sunset chords: Am9, Fmaj7, Cmaj7, G6
+    const chords = [
+      [220.0, 261.63, 329.63, 493.88], // Am9
+      [174.61, 220.0, 261.63, 329.63], // Fmaj7
+      [130.81, 164.81, 196.0, 246.94], // Cmaj7
+      [196.0, 246.94, 293.66, 392.0]   // G6
+    ];
+
+    for (let bar = 0; bar < bars; bar++) {
+      const barStart = Math.floor(bar * barSamples);
+      const chord = chords[bar % chords.length];
+      const bassRoot = chord[0] * 0.5;
+
+      for (let beat = 0; beat < 4; beat++) {
+        const kickStart = Math.floor(barStart + beat * beatSamples);
+        const kickLen = Math.floor(0.36 * sampleRate);
+
+        // Deep warm kick
+        for (let i = 0; i < kickLen && kickStart + i < left.length; i++) {
+          const t = i / sampleRate;
+          const freq = 120 * Math.exp(-t * 26) + 40;
+          const val = Math.sin(2 * Math.PI * freq * t) * Math.exp(-t * 8.0);
+          left[kickStart + i] += val * 0.68;
+          right[kickStart + i] += val * 0.68;
+        }
+
+        // Shakers / soft hats
+        const sixteenth = beatSamples / 4;
+        for (let s = 0; s < 4; s++) {
+          const hatStart = Math.floor(kickStart + s * sixteenth);
+          const hatLen = Math.floor(0.08 * sampleRate);
+          const vol = (s === 2) ? 0.25 : 0.12;
+          for (let i = 0; i < hatLen && hatStart + i < left.length; i++) {
+            const t = i / sampleRate;
+            const noise = (Math.random() * 2 - 1) * Math.exp(-t * 40);
+            left[hatStart + i] += noise * vol;
+            right[hatStart + i] += noise * vol * 0.8;
+          }
+        }
+      }
+
+      // Warm rolling sub-bass
+      const eighth = beatSamples / 2;
+      for (let e = 0; e < 8; e++) {
+        const bassStart = Math.floor(barStart + e * eighth);
+        const bassLen = Math.floor(0.28 * sampleRate);
+        for (let i = 0; i < bassLen && bassStart + i < left.length; i++) {
+          const t = i / sampleRate;
+          const sine = Math.sin(2 * Math.PI * bassRoot * t);
+          const val = sine * Math.exp(-t * 6.5) * 0.55;
+          left[bassStart + i] += val;
+          right[bassStart + i] += val;
+        }
+      }
+
+      // Plucked acoustic guitar/chime chords
+      const sixteenth = beatSamples / 4;
+      const pluckPattern = [1, 0, 0, 1,  0, 1, 0, 0,  1, 0, 1, 0,  0, 1, 0, 1];
+      for (let s = 0; s < 16; s++) {
+        if (pluckPattern[s]) {
+          const pluckStart = Math.floor(barStart + s * sixteenth);
+          const pluckLen = Math.floor(0.35 * sampleRate);
+          for (let i = 0; i < pluckLen && pluckStart + i < left.length; i++) {
+            const t = i / sampleRate;
+            let sumL = 0;
+            let sumR = 0;
+            chord.forEach((freq, idx) => {
+              const sine = Math.sin(2 * Math.PI * freq * t);
+              const harmonic = Math.sin(2 * Math.PI * freq * 2 * t) * 0.4;
+              const env = Math.exp(-t * 14);
+              const v = (sine + harmonic) * env;
+              sumL += v * (idx % 2 === 0 ? 0.7 : 0.4);
+              sumR += v * (idx % 2 === 1 ? 0.7 : 0.4);
+            });
+            left[pluckStart + i] += sumL * 0.16;
+            right[pluckStart + i] += sumR * 0.16;
+          }
+        }
+      }
+    }
+    this.normalizeBuffer(buffer, 0.88);
+  }
+
+  synthesizeSynthwaveRetroTrack(buffer, bpm, bars) {
+    const sampleRate = buffer.sampleRate;
+    const left = buffer.getChannelData(0);
+    const right = buffer.getChannelData(1);
+    const beatSamples = (60 / bpm) * sampleRate;
+    const barSamples = beatSamples * 4;
+
+    const roots = [110.0, 98.0, 87.31, 98.0]; // A, G, F, G
+
+    for (let bar = 0; bar < bars; bar++) {
+      const barStart = Math.floor(bar * barSamples);
+      const root = roots[bar % roots.length];
+
+      for (let beat = 0; beat < 4; beat++) {
+        const kickStart = Math.floor(barStart + beat * beatSamples);
+        const kickLen = Math.floor(0.35 * sampleRate);
+
+        // 80s punchy kick
+        for (let i = 0; i < kickLen && kickStart + i < left.length; i++) {
+          const t = i / sampleRate;
+          const freq = 160 * Math.exp(-t * 26) + 50;
+          const val = Math.sin(2 * Math.PI * freq * t) * Math.exp(-t * 9);
+          left[kickStart + i] += val * 0.7;
+          right[kickStart + i] += val * 0.7;
+        }
+
+        // Gated 80s Snare on 1 & 3
+        if (beat === 1 || beat === 3) {
+          const snareStart = kickStart;
+          const snareLen = Math.floor(0.28 * sampleRate);
+          for (let i = 0; i < snareLen && snareStart + i < left.length; i++) {
+            const t = i / sampleRate;
+            const noise = (Math.random() * 2 - 1) * Math.exp(-t * 11);
+            const tone = Math.sin(2 * Math.PI * 220 * t) * Math.exp(-t * 16);
+            left[snareStart + i] += (noise * 0.5 + tone * 0.3);
+            right[snareStart + i] += (noise * 0.5 + tone * 0.3);
+          }
+        }
+      }
+
+      // Rolling 16th-note Giorgio Moroder synth bass
+      const sixteenth = beatSamples / 4;
+      for (let s = 0; s < 16; s++) {
+        const bassStart = Math.floor(barStart + s * sixteenth);
+        const bassLen = Math.floor(0.12 * sampleRate);
+        const noteFreq = (s % 2 === 0) ? root : root * 2;
+        for (let i = 0; i < bassLen && bassStart + i < left.length; i++) {
+          const t = i / sampleRate;
+          const saw = (2 * ((noteFreq * t) % 1) - 1);
+          const val = saw * Math.exp(-t * 15) * 0.5;
+          left[bassStart + i] += val;
+          right[bassStart + i] += val;
+        }
+      }
+
+      // Neon synth arpeggio
+      const arpNotes = [root * 2, root * 2.5, root * 3, root * 4];
+      for (let s = 0; s < 16; s++) {
+        const arpStart = Math.floor(barStart + s * sixteenth);
+        const arpLen = Math.floor(0.16 * sampleRate);
+        const nFreq = arpNotes[s % arpNotes.length];
+        for (let i = 0; i < arpLen && arpStart + i < left.length; i++) {
+          const t = i / sampleRate;
+          const square = Math.sin(2 * Math.PI * nFreq * t) > 0 ? 0.7 : -0.7;
+          const val = square * Math.exp(-t * 18) * 0.18;
+          left[arpStart + i] += val * 0.7;
+          right[arpStart + i] += val;
+        }
+      }
+    }
+    this.normalizeBuffer(buffer, 0.88);
+  }
+
+  synthesizeFutureTrapTrack(buffer, bpm, bars) {
+    const sampleRate = buffer.sampleRate;
+    const left = buffer.getChannelData(0);
+    const right = buffer.getChannelData(1);
+    const beatSamples = (60 / bpm) * sampleRate;
+    const barSamples = beatSamples * 4;
+
+    const chords = [
+      [261.63, 329.63, 392.0, 523.25], // C
+      [220.0, 261.63, 329.63, 440.0],  // Am
+      [174.61, 220.0, 261.63, 349.23], // F
+      [196.0, 246.94, 293.66, 392.0]   // G
+    ];
+
+    for (let bar = 0; bar < bars; bar++) {
+      const barStart = Math.floor(bar * barSamples);
+      const chord = chords[bar % chords.length];
+
+      // 1. Sliding 808 Sub-Bass on beat 0 and beat 2.5
+      const subKickMoments = [0, beatSamples * 2.5];
+      subKickMoments.forEach(offset => {
+        const kickStart = Math.floor(barStart + offset);
+        const kickLen = Math.floor(0.85 * sampleRate);
+        for (let i = 0; i < kickLen && kickStart + i < left.length; i++) {
+          const t = i / sampleRate;
+          const freq = 150 * Math.exp(-t * 18) + 38;
+          const sine = Math.sin(2 * Math.PI * freq * t);
+          const click = (i < 80) ? 0.5 : 0;
+          const env = Math.exp(-t * 3.5);
+          const val = (sine * 0.85 + click) * env;
+          left[kickStart + i] += val * 0.8;
+          right[kickStart + i] += val * 0.8;
+        }
+      });
+
+      // 2. Trap Snare on Beat 2 (half-time!)
+      const snareStart = Math.floor(barStart + beatSamples * 2);
+      const snareLen = Math.floor(0.25 * sampleRate);
+      for (let i = 0; i < snareLen && snareStart + i < left.length; i++) {
+        const t = i / sampleRate;
+        const noise = (Math.random() * 2 - 1) * Math.exp(-t * 20);
+        const tone = Math.sin(2 * Math.PI * 260 * t) * Math.exp(-t * 30);
+        left[snareStart + i] += (noise * 0.6 + tone * 0.3);
+        right[snareStart + i] += (noise * 0.6 + tone * 0.3);
+      }
+
+      // 3. Fast trap hi-hats with triplet rolls
+      const sixteenth = beatSamples / 4;
+      for (let s = 0; s < 16; s++) {
+        const hatStart = Math.floor(barStart + s * sixteenth);
+        const hatLen = Math.floor(0.05 * sampleRate);
+        for (let i = 0; i < hatLen && hatStart + i < left.length; i++) {
+          const t = i / sampleRate;
+          const noise = (Math.random() * 2 - 1) * Math.exp(-t * 70);
+          left[hatStart + i] += noise * 0.18;
+          right[hatStart + i] += noise * 0.18;
+        }
+      }
+
+      // 4. Floating ambient chord pads
+      const padLen = Math.floor(barSamples);
+      for (let i = 0; i < padLen && barStart + i < left.length; i++) {
+        const t = i / sampleRate;
+        let sum = 0;
+        chord.forEach(freq => {
+          sum += Math.sin(2 * Math.PI * freq * t);
+        });
+        const env = Math.sin((i / padLen) * Math.PI);
+        const val = sum * env * 0.08;
+        left[barStart + i] += val;
+        right[barStart + i] += val;
       }
     }
     this.normalizeBuffer(buffer, 0.88);
